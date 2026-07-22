@@ -1,0 +1,66 @@
+[project]
+name = "ebay-mcp"
+version = "0.1.0"
+description = "eBay Browse-API MCP server (OAuth client-credentials) built on mcp-platform-core."
+requires-python = ">=3.11"
+dependencies = [
+  "mcp-platform-core",
+  "httpx>=0.27,<1",
+]
+
+[project.scripts]
+ebay-mcp = "ebay_mcp.server:main"
+
+# Pin the platform core as an external, versioned library (one-way app -> core).
+# LOCAL DEV: resolves from the local mcp-platform-py git repo at the release tag.
+# ON PUSH: replace the `git = "file://..."` line with the GitHub URL.
+[tool.uv.sources]
+mcp-platform-core = { git = "file:///Users/riteshpatani/46101labs/mcp-platform-py", tag = "mcp-platform-core-v0.1.0", subdirectory = "packages/core" }
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "pytest-asyncio>=0.24",
+  "respx>=0.21",
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "pip-audit>=2.7",
+  "bandit>=1.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ebay_mcp"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "ASYNC", "S", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S107"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["ebay_mcp"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+no_implicit_reexport = true
+plugins = ["pydantic.mypy"]
+mypy_path = ["src"]
+exclude = ["tests/"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --strict-config"
+testpaths = ["tests"]
+asyncio_mode = "auto"
